@@ -42,11 +42,13 @@ plantilla <-  '{
 plantilla <- str_replace(plantilla,"nombre",data$name)
 plantilla <- str_replace(plantilla,"coordenada",data$geometry)
 
+stri_trans_list()
+
 normalizarNombre <- function(nombre) {
     nombre <- str_replace_all(nombre,"X","")
     nombre <- str_replace_all(nombre,"[[:punct:]]"," ")
-    nombre <- stri_trans_general(nombre, "Any-Title")
-    nombre <- str_replace_all(nombre,"\\s","")
+    nombre <- stri_trans_general(nombre, "Any-Lower")
+    nombre <- str_replace_all(nombre,"\\s","_")
     nombre <- stri_trans_general(nombre, "latin-ascii")
     nombre
 }
