@@ -5,7 +5,7 @@ require(jsonlite)
 require(stringr)
 require(stringi)
 
-grupos <- c("providencia","de_bruces_a_mi", "tarmac")
+grupos <- c("esteman", "laura_y_la_maquina_de_escribir", "pedrina_y_el_rio")
 
 ## Del repositorio son0p/mapasGrupos retorna los enlaces a los archivos geojson
 get_raw_link <- function(github_repo, grupo) {
