@@ -5,7 +5,7 @@ require(jsonlite)
 require(stringr)
 require(stringi)
 
-grupos <- c("providencia","de_bruces_a_mi", "tarmac")
+grupos <- c("providencia","de_bruces_a_mi", "tarmac", "esteman","laura_y_la_maquina_de_escribir", "pedrina_y_el_rio")
 
 ## Del repositorio son0p/mapasGrupos retorna los enlaces a los archivos geojson
 get_raw_link <- function(github_repo, grupo) {
@@ -23,8 +23,13 @@ get_raw_geojson <- function(github_repo, grupo) {
 ## Basado en la estructura del geojson toma las features y sus propiedades y los exporta como data.frame
 ## Acá solo cojo los datos de las features y no la geometría que contiene las coordenadas
 flat_data <- function(mapas) {
-    flatten_data <- lapply(setNames(mapas, names(mapas)), function(x) cbind2(x[[2]][[2]], x[[2]][[3]]))
-    ldply(flatten_data, cbind)
+    flatten_features <- lapply(setNames(mapas, names(mapas)), function(x) x[['features']][['properties']]) # Saco las features del mapa para cada grupo y la meto como un elemento de una lista
+    flatten_geometry <- lapply(setNames(mapas, names(mapas)), function(x) x[['features']][['geometry']]['coordinates']) # Sacos las geometrías del mapa para cada grupo y la meto como un elemento de una lista
+    flatten_features <- ldply(flatten_features, cbind) # Uno la lista de cada grupo en una sola
+    flatten_geometry <- ldply(flatten_geometry, cbind)  # Uno la lista de cada grupo en una sola
+    flatten_geometry <- data.frame(matrix(unlist(flatten_geometry$coordinates), nrow=length(flatten_geometry$coordinates), byrow=TRUE)) # La línea de arriba es sacada de acá http://www.r-bloggers.com/converting-a-list-to-a-data-frame/ Para convertir una lista en un data.frame
+    colnames(flatten_geometry) <- c("x","y")
+    cbind2(flatten_features, flatten_geometry) # Combino las features con las geometrías de cada grupo (solo soporta puntos)
 }
 
 open_in_excel <- function(some_df){
@@ -48,23 +53,6 @@ get_raw_link("son0p/mapasGrupos", grupos)
 
 flatten_data <- flat_data(mapas)
 colnames(flatten_data) <- normalizarNombre(colnames(flatten_data))
-str(flatten_data)
+str(flatten_data) # Sacar los datos de las coordenadas
 
-require(timelineR)
-timeline()
-
-
-format_data <- function(data) {
-    len <- length(data)
-    types <- c()
-    for(i in 1:len) {
-        types[i] <- switch(typeof(data[,i]), character="as.factor", logical="as.factor", integer="as.numeric","")
-    }
-    (expr <- paste0(types,"(data$",colnames(data),")"))
-    for(i in 1:len){
-        data[i] <- (eval(parse(text = expr[i])))
-    }
-    data
-}
-
-flatten_data <- format_data(flatten_data)
+open_in_excel(flatten_data)
