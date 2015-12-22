@@ -6,7 +6,7 @@ require(stringr)
 require(stringi)
 require(lubridate)
 
-grupos <- c("esteman","laura_y_la_maquina_de_escribir", "pedrina_y_rio")
+grupos <- c("esteman","laura_y_la_maquina_de_escribir", "pedrina_y_rio","fonseca","manuel_medrano")
 
 ## Del repositorio son0p/mapasGrupos retorna los enlaces a los archivos geojson
 get_raw_link <- function(github_repo, grupo) {
@@ -64,3 +64,10 @@ flatten_data$Capacity <- as.numeric(flatten_data$Capacity)
 devtools::install_github("hrbrmstr/streamgraph")
 require(streamgraph)
 streamgraph(flatten_data, "Id", "Capacity" , "Date", interactive = TRUE , interpolate="step", offset = "zero") %>%  sg_legend(show=TRUE, label="Agrupación: ") %>% sg_axis_x(20, "año", "%Y")
+
+## Usando https://plot.ly/r/
+#devtools::install_github("ropensci/plotly") ## Descomentar esta línea para comentar
+require(plotly)
+
+b <- ggplot(flatten_data, aes(x = ymd(date), y = as.numeric(capacity), size = as.numeric(capacity), colour = factor(.id))) + geom_point(stat = "identity")
+(gg <- ggplotly(b))
